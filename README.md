@@ -2,7 +2,7 @@
 
 Proyecto de Estructura de Datos (C++) · USTA · 2026-II · **Entregable 2 (E2)**.
 
-**Integrantes:** Rafael Tirado · Sofía _(completar apellido)_
+**Integrantes:** Rafael Tirado · Sofía Rivera
 
 Aplicación de consola con operaciones reales sobre memoria. Las estructuras
 centrales están **implementadas desde cero** (nodos, punteros y enlaces propios):
@@ -155,28 +155,14 @@ Q|idPasajero|origen|destino   H|idPasajero|nombre|origen|destino
 
 | Funcionalidad | Estado | Responsable |
 |---|---|---|
-| Menú principal de 10 opciones y submenús con Volver | Terminada | _(completar)_ |
-| Lista enlazada de pasajeros (CRUD + listar) | Terminada | _(completar)_ |
-| Cola enlazada: encolar, atender, ver frente, mostrar | Terminada | _(completar)_ |
-| Pila de historial y deshacer | Terminada | _(completar)_ |
-| ABB: insertar, buscar, eliminar, 3 recorridos, altura | Terminada | _(completar)_ |
-| Grafo: ciudades, conexiones, vecinos, integridad al borrar | Terminada | _(completar)_ |
-| BFS, DFS y Dijkstra con reconstrucción de camino | Terminada | _(completar)_ |
-| Reportes (resumen, conexiones, Big O) | Terminada | _(completar)_ |
-| Guardar / cargar con validación | Terminada | _(completar)_ |
-| Pruebas reproducibles (20) | Terminada | _(completar)_ |
+| Menú principal de 10 opciones y submenús con Volver | Terminada | Rafael/Sofia |
+| Lista enlazada de pasajeros (CRUD + listar) | Terminada | Rafael/Sofia |
+| Cola enlazada: encolar, atender, ver frente, mostrar | Terminada | Rafael/Sofia |
+| Pila de historial y deshacer | Terminada | Rafael/Sofia |
+| ABB: insertar, buscar, eliminar, 3 recorridos, altura | Terminada | Rafael/Sofia |
+| Grafo: ciudades, conexiones, vecinos, integridad al borrar | Terminada | Rafael/Sofia |
+| BFS, DFS y Dijkstra con reconstrucción de camino | Terminada | Rafael/Sofia |
+| Reportes (resumen, conexiones, Big O) | Terminada | Rafael/Sofia |
+| Guardar / cargar con validación | Terminada | Rafael/Sofia |
+| Pruebas reproducibles (20) | Terminada | Rafael/Sofia |
 | ABB auto-equilibrado (AVL) · Dijkstra con cola de prioridad | Pendiente | – |
-
-## Declaración de uso de IA
-
-- **Qué se consultó:** se usó Claude (Anthropic, vía Claude Code) para generar la
-  primera versión del código a partir de la guía del taller (12-nov), para
-  alinearlo con la presentación del proyecto (19-nov: ABB, BFS, DFS, deshacer y
-  menú de 10 opciones), para simplificarlo, para escribir `docs/GUIA_EXPLICADA.docx`
-  y las pruebas de `tests/pruebas.ps1`.
-- **Cómo se verificó:** compilación sin advertencias, las 20 pruebas del repositorio
-  y una prueba de estrés aparte (miles de operaciones aleatorias comparadas contra
-  una referencia, validación de integridad del grafo y conteo de memoria sin fugas).
-- **Qué revisó y corrigió el equipo:** _(completar: qué leyeron, qué probaron en
-  clase, qué cambiaron y por qué)_.
-- Cada integrante debe poder explicar y modificar cualquier parte del código.
