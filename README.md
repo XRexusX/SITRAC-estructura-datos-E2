@@ -1,6 +1,6 @@
 # SITRAC – Sistema Inteligente de Transporte y Gestión de Rutas
 
-Proyecto de Estructura de Datos (C++) · USTA · 2026-II.
+Proyecto de Estructura de Datos (C++) · USTA · 2026-II · **Entregable 2 (E2)**.
 
 **Integrantes:** Rafael Tirado · Sofía _(completar apellido)_
 
@@ -61,7 +61,7 @@ src/
   Persistencia.h/.cpp    guardar / cargar en archivo de texto con validación
   Utilidades.h/.cpp      lectura segura de entradas y funciones de texto
 tests/pruebas.ps1        20 pruebas automáticas      tests/resultados.txt  registro de la última ejecución
-docs/GUIA_EXPLICADA.md   el código explicado desde cero (para estudiar y sustentar)
+docs/GUIA_EXPLICADA.docx  guía en Word: el código explicado fácil y desde cero
 docs/EVIDENCIAS.md       evidencias de ejecución
 ```
 
@@ -172,7 +172,7 @@ Q|idPasajero|origen|destino   H|idPasajero|nombre|origen|destino
 - **Qué se consultó:** se usó Claude (Anthropic, vía Claude Code) para generar la
   primera versión del código a partir de la guía del taller (12-nov), para
   alinearlo con la presentación del proyecto (19-nov: ABB, BFS, DFS, deshacer y
-  menú de 10 opciones), para simplificarlo, para escribir `docs/GUIA_EXPLICADA.md`
+  menú de 10 opciones), para simplificarlo, para escribir `docs/GUIA_EXPLICADA.docx`
   y las pruebas de `tests/pruebas.ps1`.
 - **Cómo se verificó:** compilación sin advertencias, las 20 pruebas del repositorio
   y una prueba de estrés aparte (miles de operaciones aleatorias comparadas contra
