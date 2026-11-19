@@ -33,7 +33,6 @@ bool leerTexto(const std::string& prompt, std::string& salida);
 std::string recortar(const std::string& s);
 std::string minusculas(const std::string& s);
 bool iguales(const std::string& a, const std::string& b);   // sin distinguir mayusculas
-bool contiene(const std::string& texto, const std::string& parte);  // idem
 bool textoValido(const std::string& s);
 
 // Conversion estricta (toda la cadena debe ser el numero).

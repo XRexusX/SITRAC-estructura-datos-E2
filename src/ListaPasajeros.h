@@ -31,8 +31,6 @@ public:
     // false si el ID no existe (la lista queda intacta).
     bool eliminar(int id);
     void listar() const;
-    // Imprime los pasajeros cuyo nombre contiene 'fragmento'. Devuelve cuantos.
-    int listarPorNombre(const std::string& fragmento) const;
 
     int tamano() const { return cantidad; }
     bool estaVacia() const { return cantidad == 0; }

@@ -96,7 +96,7 @@ bool cargarSistema(Sistema& sis, const std::string& archivo, std::string& error)
         } else if (f[0] == "R" && n == 4) {
             double d = 0;
             if (!util::parsearDecimal(f[3], d) ||
-                temp.grafo.agregarRuta(f[1], f[2], d) != RUTA_OK) {
+                temp.grafo.agregarConexion(f[1], f[2], d) != RUTA_OK) {
                 error = errorLinea(numero, "ruta invalida (ciudades, distancia o duplicada)");
                 return false;
             }
@@ -108,7 +108,7 @@ bool cargarSistema(Sistema& sis, const std::string& archivo, std::string& error)
                 return false;
             }
             p.nombre = f[2];
-            if (!temp.pasajeros.insertar(p)) {
+            if (!temp.agregarPasajero(p)) {  // lista Y arbol (se reconstruye el ABB)
                 error = errorLinea(numero, "ID de pasajero duplicado");
                 return false;
             }
@@ -149,6 +149,7 @@ bool cargarSistema(Sistema& sis, const std::string& archivo, std::string& error)
 
     // Todo valido: intercambiar. El destructor de 'temp' libera los datos viejos.
     sis.pasajeros.intercambiar(temp.pasajeros);
+    sis.arbol.intercambiar(temp.arbol);
     sis.grafo.intercambiar(temp.grafo);
     sis.cola.intercambiar(temp.cola);
     sis.historial.intercambiar(temp.historial);

@@ -1,3 +1,5 @@
+// Menus.cpp - Interaccion con el usuario. Cada funcion pide datos, llama a la
+// estructura correspondiente y muestra el resultado. NO guarda datos aqui.
 #include "Menus.h"
 
 #include <iostream>
@@ -12,8 +14,9 @@ using std::string;
 namespace {
 
 const char* ARCHIVO_POR_DEFECTO = "sitrac_datos.txt";
+const int ID_MAXIMO = 2147483647;
 
-// ===================================================================== CIUDADES
+// ================================================== 1. GESTION DE CIUDADES
 
 void ciudadAgregar(Sistema& sis) {
     string nombre;
@@ -31,22 +34,22 @@ void ciudadEliminar(Sistema& sis) {
         cout << "  [!] La ciudad '" << nombre << "' no existe.\n";
         return;
     }
-    // No se puede dejar una solicitud pendiente apuntando a una ciudad borrada.
+    // Una solicitud pendiente no puede quedar apuntando a una ciudad borrada.
     if (sis.cola.usaCiudad(nombre)) {
         cout << "  [!] No se puede eliminar: hay solicitudes en cola que usan esa ciudad. "
                 "Atiendalas primero.\n";
         return;
     }
-    int rutas = 0;
-    sis.grafo.eliminarCiudad(nombre, rutas);
-    cout << "  [OK] Ciudad eliminada junto con " << rutas
-         << " ruta(s) que la conectaban (sin referencias colgantes).\n";
+    int quitadas = 0;
+    sis.grafo.eliminarCiudad(nombre, quitadas);
+    cout << "  [OK] Ciudad eliminada junto con " << quitadas
+         << " conexion(es) que llegaban a ella (sin referencias colgantes).\n";
 }
 
 void menuCiudades(Sistema& sis) {
     int op;
     do {
-        cout << "\n--- CIUDADES ---\n"
+        cout << "\n--- 1. GESTION DE CIUDADES ---\n"
                 " 1. Agregar ciudad\n"
                 " 2. Eliminar ciudad\n"
                 " 3. Listar ciudades\n"
@@ -61,127 +64,123 @@ void menuCiudades(Sistema& sis) {
     } while (op != 0);
 }
 
-// ======================================================================= RUTAS
+// ================================================ 2. GESTION DE CONEXIONES
 
-void mensajeRuta(ResultadoRuta r) {
+void mensajeConexion(ResultadoRuta r) {
     switch (r) {
         case RUTA_OK: cout << "  [OK] Operacion realizada.\n"; break;
         case RUTA_CIUDAD_INEXISTENTE: cout << "  [!] Alguna de las ciudades no existe.\n"; break;
-        case RUTA_MISMA_CIUDAD: cout << "  [!] Una ruta debe unir dos ciudades distintas.\n"; break;
+        case RUTA_MISMA_CIUDAD: cout << "  [!] Una conexion une dos ciudades distintas.\n"; break;
         case RUTA_DISTANCIA_INVALIDA:
             cout << "  [!] Distancia invalida: debe ser un numero mayor que 0.\n";
             break;
-        case RUTA_YA_EXISTE: cout << "  [!] Esa ruta ya existe.\n"; break;
-        case RUTA_NO_EXISTE: cout << "  [!] Esa ruta no existe.\n"; break;
+        case RUTA_YA_EXISTE: cout << "  [!] Esa conexion ya existe.\n"; break;
+        case RUTA_NO_EXISTE: cout << "  [!] Esa conexion no existe.\n"; break;
     }
 }
 
-void rutaAgregar(Sistema& sis) {
+void conexionAgregar(Sistema& sis) {
     string a, b;
-    double d = 0;
+    double km = 0;
     if (!util::leerTexto("  Ciudad A: ", a)) return;
     if (!util::leerTexto("  Ciudad B: ", b)) return;
-    if (!util::leerDecimal("  Distancia (km): ", d)) return;
-    mensajeRuta(sis.grafo.agregarRuta(a, b, d));
+    if (!util::leerDecimal("  Distancia (km): ", km)) return;
+    mensajeConexion(sis.grafo.agregarConexion(a, b, km));
 }
 
-void rutaEliminar(Sistema& sis) {
+void conexionEliminar(Sistema& sis) {
     string a, b;
     if (!util::leerTexto("  Ciudad A: ", a)) return;
     if (!util::leerTexto("  Ciudad B: ", b)) return;
-    mensajeRuta(sis.grafo.eliminarRuta(a, b));
+    mensajeConexion(sis.grafo.eliminarConexion(a, b));
 }
 
-void rutaVecinos(Sistema& sis) {
+void conexionVecinos(Sistema& sis) {
     string nombre;
     if (!util::leerTexto("  Ciudad: ", nombre)) return;
     if (!sis.grafo.listarVecinos(nombre))
         cout << "  [!] La ciudad '" << nombre << "' no existe.\n";
 }
 
-void menuRutas(Sistema& sis) {
+void menuConexiones(Sistema& sis) {
     int op;
     do {
-        cout << "\n--- RUTAS ---\n"
-                " 1. Agregar ruta\n"
-                " 2. Eliminar ruta\n"
+        cout << "\n--- 2. GESTION DE CONEXIONES ---\n"
+                " 1. Agregar conexion\n"
+                " 2. Eliminar conexion\n"
                 " 3. Consultar vecinos de una ciudad\n"
-                " 4. Listar todas las rutas\n"
+                " 4. Listar todas las conexiones\n"
                 " 0. Volver\n";
         op = util::leerOpcion("Opcion: ", 0, 4);
         switch (op) {
-            case 1: rutaAgregar(sis); break;
-            case 2: rutaEliminar(sis); break;
-            case 3: rutaVecinos(sis); break;
-            case 4: sis.grafo.listarRutas(); break;
+            case 1: conexionAgregar(sis); break;
+            case 2: conexionEliminar(sis); break;
+            case 3: conexionVecinos(sis); break;
+            case 4: sis.grafo.listarConexiones(); break;
             default: break;
         }
     } while (op != 0);
 }
 
-// ==================================================================== PASAJEROS
-
-bool leerDatosPasajero(string& nombre, int& edad) {
-    if (!util::leerTexto("  Nombre: ", nombre)) return false;
-    return util::leerEntero("  Edad (0-120): ", 0, 120, edad);
-}
+// ================================================= 3. GESTION DE PASAJEROS
 
 void pasajeroInsertar(Sistema& sis) {
     Pasajero p;
-    if (!util::leerEntero("  ID (entero positivo): ", 1, 2147483647, p.id)) return;
-    if (sis.pasajeros.buscar(p.id) != nullptr) {  // evita pedir mas datos
+    if (!util::leerEntero("  ID (entero positivo): ", 1, ID_MAXIMO, p.id)) return;
+    if (sis.pasajeros.buscar(p.id) != nullptr) {  // se avisa antes de pedir mas datos
         cout << "  [!] Ya existe un pasajero con ID " << p.id << ". No se inserto.\n";
         return;
     }
-    if (!leerDatosPasajero(p.nombre, p.edad)) return;
-    if (sis.pasajeros.insertar(p))
-        cout << "  [OK] Pasajero " << p.id << " registrado.\n";
+    if (!util::leerTexto("  Nombre: ", p.nombre)) return;
+    if (!util::leerEntero("  Edad (0-120): ", 0, 120, p.edad)) return;
+    if (sis.agregarPasajero(p))
+        cout << "  [OK] Pasajero " << p.id << " registrado (lista y arbol).\n";
     else
         cout << "  [!] ID duplicado. No se inserto.\n";
 }
 
-void pasajeroBuscar(Sistema& sis) {
+void pasajeroBuscarEnLista(Sistema& sis) {
     int id;
-    if (!util::leerEntero("  ID a buscar: ", 1, 2147483647, id)) return;
+    if (!util::leerEntero("  ID a buscar: ", 1, ID_MAXIMO, id)) return;
     const Pasajero* p = sis.pasajeros.buscar(id);
     if (p == nullptr)
         cout << "  [!] No existe un pasajero con ID " << id << ".\n";
     else
-        cout << "  ID " << p->id << " | " << p->nombre << " | " << p->edad << " anios\n";
+        cout << "  Encontrado en la LISTA: ID " << p->id << " | " << p->nombre << " | "
+             << p->edad << " anios\n";
 }
 
 void pasajeroActualizar(Sistema& sis) {
-    int id;
-    if (!util::leerEntero("  ID a actualizar: ", 1, 2147483647, id)) return;
+    int id, edad;
+    string nombre;
+    if (!util::leerEntero("  ID a actualizar: ", 1, ID_MAXIMO, id)) return;
     if (sis.pasajeros.buscar(id) == nullptr) {
         cout << "  [!] No existe un pasajero con ID " << id << ".\n";
         return;
     }
-    string nombre;
-    int edad;
-    if (!leerDatosPasajero(nombre, edad)) return;
-    sis.pasajeros.actualizar(id, nombre, edad);
+    if (!util::leerTexto("  Nombre nuevo: ", nombre)) return;
+    if (!util::leerEntero("  Edad nueva (0-120): ", 0, 120, edad)) return;
+    sis.actualizarPasajero(id, nombre, edad);
     cout << "  [OK] Pasajero " << id << " actualizado.\n";
 }
 
 void pasajeroEliminar(Sistema& sis) {
     int id;
-    if (!util::leerEntero("  ID a eliminar: ", 1, 2147483647, id)) return;
-    if (!sis.pasajeros.eliminar(id)) {
+    if (!util::leerEntero("  ID a eliminar: ", 1, ID_MAXIMO, id)) return;
+    int retiradas = 0;
+    if (!sis.quitarPasajero(id, retiradas)) {
         cout << "  [!] No existe un pasajero con ID " << id << ". No se elimino nada.\n";
         return;
     }
-    // Sus solicitudes pendientes quedarian apuntando a un pasajero inexistente.
-    int quitadas = sis.cola.eliminarDePasajero(id);
-    cout << "  [OK] Pasajero " << id << " eliminado.";
-    if (quitadas > 0) cout << " Tambien se retiraron " << quitadas << " solicitud(es) de la cola.";
+    cout << "  [OK] Pasajero " << id << " eliminado (lista y arbol).";
+    if (retiradas > 0) cout << " Tambien se retiraron " << retiradas << " solicitud(es) de la cola.";
     cout << "\n";
 }
 
 void menuPasajeros(Sistema& sis) {
     int op;
     do {
-        cout << "\n--- PASAJEROS ---\n"
+        cout << "\n--- 3. GESTION DE PASAJEROS (lista enlazada) ---\n"
                 " 1. Insertar pasajero\n"
                 " 2. Buscar por ID\n"
                 " 3. Actualizar pasajero\n"
@@ -191,7 +190,7 @@ void menuPasajeros(Sistema& sis) {
         op = util::leerOpcion("Opcion: ", 0, 5);
         switch (op) {
             case 1: pasajeroInsertar(sis); break;
-            case 2: pasajeroBuscar(sis); break;
+            case 2: pasajeroBuscarEnLista(sis); break;
             case 3: pasajeroActualizar(sis); break;
             case 4: pasajeroEliminar(sis); break;
             case 5: sis.pasajeros.listar(); break;
@@ -200,12 +199,12 @@ void menuPasajeros(Sistema& sis) {
     } while (op != 0);
 }
 
-// ======================================================================== COLA
+// ================================================= 4. COLA DE SOLICITUDES
 
 void colaEncolar(Sistema& sis) {
     int id;
     string origen, destino;
-    if (!util::leerEntero("  ID del pasajero: ", 1, 2147483647, id)) return;
+    if (!util::leerEntero("  ID del pasajero: ", 1, ID_MAXIMO, id)) return;
     if (sis.pasajeros.buscar(id) == nullptr) {
         cout << "  [!] No existe un pasajero con ID " << id << ".\n";
         return;
@@ -222,6 +221,7 @@ void colaEncolar(Sistema& sis) {
         cout << "  [!] El origen y el destino deben ser distintos.\n";
         return;
     }
+    // Solo se acepta la solicitud si existe un camino entre las dos ciudades.
     double km = 0;
     string camino;
     if (!sis.grafo.rutaMasCorta(co->nombre, cd->nombre, km, camino)) {
@@ -244,7 +244,7 @@ void colaAtender(Sistema& sis) {
         cout << "  [!] La cola esta vacia: no hay solicitudes por atender.\n";
         return;
     }
-    Viaje v;
+    Viaje v;  // el viaje atendido se apila en el historial
     v.idPasajero = s.idPasajero;
     const Pasajero* p = sis.pasajeros.buscar(s.idPasajero);
     v.nombrePasajero = (p != nullptr) ? p->nombre : string("(desconocido)");
@@ -268,7 +268,7 @@ void colaFrente(Sistema& sis) {
 void menuCola(Sistema& sis) {
     int op;
     do {
-        cout << "\n--- COLA DE SOLICITUDES ---\n"
+        cout << "\n--- 4. COLA DE SOLICITUDES (FIFO) ---\n"
                 " 1. Encolar solicitud de viaje\n"
                 " 2. Atender solicitud (frente)\n"
                 " 3. Mostrar frente\n"
@@ -285,29 +285,49 @@ void menuCola(Sistema& sis) {
     } while (op != 0);
 }
 
-// ================================================================== HISTORIAL
+// ================================================== 5. PILA DE HISTORIAL
+
+void historialDeshacer(Sistema& sis) {
+    Viaje v;
+    switch (sis.deshacerUltimaAtencion(v)) {
+        case DESHACER_OK:
+            cout << "  [OK] Deshecho: " << v.nombrePasajero << " (ID " << v.idPasajero << "), "
+                 << v.origen << " -> " << v.destino << " volvio al FRENTE de la cola.\n";
+            break;
+        case DESHACER_VACIO:
+            cout << "  [!] El historial esta vacio: no hay nada que deshacer.\n";
+            break;
+        case DESHACER_IMPOSIBLE:
+            cout << "  [!] No se puede deshacer: el pasajero o alguna ciudad de ese viaje ya "
+                    "no existe.\n";
+            break;
+    }
+}
+
+void historialUltimo(Sistema& sis) {
+    Viaje v;
+    if (sis.historial.verTope(v))
+        cout << "  Ultimo: " << v.nombrePasajero << " (ID " << v.idPasajero << "), " << v.origen
+             << " -> " << v.destino << "\n";
+    else
+        cout << "  [!] El historial esta vacio.\n";
+}
 
 void menuHistorial(Sistema& sis) {
     int op;
     do {
-        cout << "\n--- HISTORIAL DE VIAJES ATENDIDOS ---\n"
+        cout << "\n--- 5. PILA DE HISTORIAL (LIFO) ---\n"
                 " 1. Ver historial (mas reciente primero)\n"
                 " 2. Ver ultimo viaje atendido\n"
-                " 3. Borrar historial\n"
+                " 3. Deshacer ultima atencion\n"
+                " 4. Borrar historial\n"
                 " 0. Volver\n";
-        op = util::leerOpcion("Opcion: ", 0, 3);
+        op = util::leerOpcion("Opcion: ", 0, 4);
         switch (op) {
             case 1: sis.historial.mostrar(); break;
-            case 2: {
-                Viaje v;
-                if (sis.historial.verTope(v))
-                    cout << "  Ultimo: " << v.nombrePasajero << " (ID " << v.idPasajero << "), "
-                         << v.origen << " -> " << v.destino << "\n";
-                else
-                    cout << "  [!] El historial esta vacio.\n";
-                break;
-            }
-            case 3:
+            case 2: historialUltimo(sis); break;
+            case 3: historialDeshacer(sis); break;
+            case 4:
                 sis.historial.vaciar();
                 cout << "  [OK] Historial borrado.\n";
                 break;
@@ -316,16 +336,72 @@ void menuHistorial(Sistema& sis) {
     } while (op != 0);
 }
 
-// =================================================================== BUSQUEDAS
+// ================================================= 6. ARBOL DE BUSQUEDAS
 
-void buscarPorNombre(Sistema& sis) {
-    string frag;
-    if (!util::leerTexto("  Texto a buscar en el nombre: ", frag)) return;
-    if (sis.pasajeros.listarPorNombre(frag) == 0)
-        cout << "  [!] Ningun pasajero coincide con '" << frag << "'.\n";
+void arbolBuscar(Sistema& sis) {
+    int id;
+    if (!util::leerEntero("  ID a buscar: ", 1, ID_MAXIMO, id)) return;
+    const Pasajero* p = sis.arbol.buscar(id);
+    if (p == nullptr)
+        cout << "  [!] No existe un pasajero con ID " << id << " en el arbol.\n";
+    else
+        cout << "  Encontrado en el ARBOL: ID " << p->id << " | " << p->nombre << " | "
+             << p->edad << " anios\n";
 }
 
-void buscarRutaCorta(Sistema& sis) {
+void menuArbol(Sistema& sis) {
+    int op;
+    do {
+        cout << "\n--- 6. ARBOL DE BUSQUEDAS (ABB por ID) ---\n"
+                " 1. Insertar pasajero (queda en la lista y en el arbol)\n"
+                " 2. Buscar por ID en el arbol\n"
+                " 3. Eliminar pasajero (de la lista y del arbol)\n"
+                " 4. Recorrido inorden (ordenado por ID)\n"
+                " 5. Recorrido preorden\n"
+                " 6. Recorrido postorden\n"
+                " 7. Altura y cantidad de nodos\n"
+                " 0. Volver\n";
+        op = util::leerOpcion("Opcion: ", 0, 7);
+        switch (op) {
+            case 1: pasajeroInsertar(sis); break;
+            case 2: arbolBuscar(sis); break;
+            case 3: pasajeroEliminar(sis); break;
+            case 4:
+                cout << "  Inorden : ";
+                sis.arbol.inorden();
+                break;
+            case 5:
+                cout << "  Preorden : ";
+                sis.arbol.preorden();
+                break;
+            case 6:
+                cout << "  Postorden: ";
+                sis.arbol.postorden();
+                break;
+            case 7:
+                cout << "  Altura: " << sis.arbol.altura() << " | Nodos: " << sis.arbol.tamano()
+                     << "\n";
+                break;
+            default: break;
+        }
+    } while (op != 0);
+}
+
+// ================================================ 7. RUTAS Y ALGORITMOS
+
+void algoritmoBFS(Sistema& sis) {
+    string inicio;
+    if (!util::leerTexto("  Ciudad de inicio: ", inicio)) return;
+    if (!sis.grafo.recorridoBFS(inicio)) cout << "  [!] La ciudad '" << inicio << "' no existe.\n";
+}
+
+void algoritmoDFS(Sistema& sis) {
+    string inicio;
+    if (!util::leerTexto("  Ciudad de inicio: ", inicio)) return;
+    if (!sis.grafo.recorridoDFS(inicio)) cout << "  [!] La ciudad '" << inicio << "' no existe.\n";
+}
+
+void algoritmoDijkstra(Sistema& sis) {
     string a, b;
     if (!util::leerTexto("  Ciudad de origen: ", a)) return;
     if (!util::leerTexto("  Ciudad de destino: ", b)) return;
@@ -341,79 +417,88 @@ void buscarRutaCorta(Sistema& sis) {
         cout << "  [!] No existe ruta entre esas ciudades.\n";
 }
 
-void menuBusquedas(Sistema& sis) {
+void menuAlgoritmos(Sistema& sis) {
     int op;
     do {
-        cout << "\n--- BUSQUEDAS ---\n"
-                " 1. Pasajero por ID\n"
-                " 2. Pasajero por nombre (contiene)\n"
-                " 3. Ruta mas corta entre dos ciudades (Dijkstra)\n"
+        cout << "\n--- 7. RUTAS Y ALGORITMOS ---\n"
+                " 1. Recorrido en anchura (BFS)\n"
+                " 2. Recorrido en profundidad (DFS)\n"
+                " 3. Ruta mas corta (Dijkstra)\n"
                 " 0. Volver\n";
         op = util::leerOpcion("Opcion: ", 0, 3);
         switch (op) {
-            case 1: pasajeroBuscar(sis); break;
-            case 2: buscarPorNombre(sis); break;
-            case 3: buscarRutaCorta(sis); break;
+            case 1: algoritmoBFS(sis); break;
+            case 2: algoritmoDFS(sis); break;
+            case 3: algoritmoDijkstra(sis); break;
             default: break;
         }
     } while (op != 0);
 }
 
-// =================================================================== REPORTES
+// ======================================================== 8. REPORTES
 
 void reporteResumen(Sistema& sis) {
     cout << "  Ciudades registradas : " << sis.grafo.cantidadCiudades() << "\n"
-         << "  Rutas registradas    : " << sis.grafo.cantidadRutas() << " ("
+         << "  Conexiones           : " << sis.grafo.cantidadConexiones() << " ("
          << util::numeroATexto(sis.grafo.kilometrosTotales()) << " km en total)\n"
-         << "  Pasajeros            : " << sis.pasajeros.tamano() << "\n"
+         << "  Pasajeros (lista)    : " << sis.pasajeros.tamano() << "\n"
+         << "  Pasajeros (arbol)    : " << sis.arbol.tamano() << " | altura "
+         << sis.arbol.altura() << "\n"
          << "  Solicitudes en cola  : " << sis.cola.tamano() << "\n"
          << "  Viajes atendidos     : " << sis.historial.tamano() << "\n";
+}
 
+void reporteConexionesPorCiudad(Sistema& sis) {
+    if (sis.grafo.cantidadCiudades() == 0) {
+        cout << "  (no hay ciudades registradas)\n";
+        return;
+    }
     const Ciudad* mejor = nullptr;
-    int gMejor = 0;
     int aisladas = 0;
     for (const Ciudad* c = sis.grafo.primera(); c != nullptr; c = c->sig) {
-        int g = Grafo::grado(c);
-        if (g == 0) ++aisladas;
-        if (mejor == nullptr || g > gMejor) {
-            mejor = c;
-            gMejor = g;
-        }
+        cout << "  " << c->nombre << ": " << Grafo::grado(c) << " conexion(es)\n";
+        if (Grafo::grado(c) == 0) ++aisladas;
+        if (mejor == nullptr || Grafo::grado(c) > Grafo::grado(mejor)) mejor = c;
     }
-    if (mejor != nullptr)
-        cout << "  Ciudad mas conectada : " << mejor->nombre << " (" << gMejor
-             << " conexiones)\n"
-             << "  Ciudades aisladas    : " << aisladas << "\n";
+    cout << "  Ciudad mas conectada: " << mejor->nombre << " (" << Grafo::grado(mejor)
+         << " conexiones)\n"
+         << "  Ciudades aisladas   : " << aisladas << "\n";
+}
 
-    if (sis.pasajeros.tamano() > 0) {
-        long suma = 0;
-        for (const NodoPasajero* p = sis.pasajeros.primero(); p != nullptr; p = p->sig)
-            suma += p->dato.edad;
-        cout << "  Edad promedio        : "
-             << util::numeroATexto(static_cast<double>(suma) / sis.pasajeros.tamano())
-             << " anios\n";
-    }
+void reporteComplejidad() {
+    cout << "  n = pasajeros, V = ciudades, E = conexiones, g = vecinos de una ciudad\n"
+            "  Insertar pasajero (lista, revisa duplicados) ... O(n)\n"
+            "  Buscar / actualizar / eliminar en la lista ..... O(n)\n"
+            "  Insertar / buscar / eliminar en el ABB ......... O(log n) equilibrado, O(n) peor caso\n"
+            "  Recorridos del ABB (in/pre/post) ............... O(n)\n"
+            "  Encolar / atender / ver frente (cola) .......... O(1)\n"
+            "  Apilar / desapilar / ver tope (pila) ........... O(1)\n"
+            "  Agregar ciudad (revisa duplicados) ............. O(V)\n"
+            "  Agregar / eliminar conexion .................... O(V + g)\n"
+            "  Eliminar ciudad ................................ O(V + E)\n"
+            "  BFS y DFS ...................................... O(V + E)\n"
+            "  Dijkstra (con arreglos) ........................ O(V^2)\n";
 }
 
 void menuReportes(Sistema& sis) {
     int op;
     do {
-        cout << "\n--- REPORTES ---\n"
+        cout << "\n--- 8. REPORTES ---\n"
                 " 1. Resumen general\n"
-                " 2. Todas las rutas\n"
-                " 3. Pasajeros registrados\n"
+                " 2. Conexiones por ciudad\n"
+                " 3. Complejidad (Big O) de las operaciones\n"
                 " 0. Volver\n";
         op = util::leerOpcion("Opcion: ", 0, 3);
         switch (op) {
             case 1: reporteResumen(sis); break;
-            case 2: sis.grafo.listarRutas(); break;
-            case 3: sis.pasajeros.listar(); break;
+            case 2: reporteConexionesPorCiudad(sis); break;
+            case 3: reporteComplejidad(); break;
             default: break;
         }
     } while (op != 0);
 }
 
-// ==================================================================== ARCHIVOS
+// ================================================== 9. GUARDAR / CARGAR
 
 bool pedirNombreArchivo(string& archivo) {
     string linea;
@@ -427,12 +512,12 @@ bool pedirNombreArchivo(string& archivo) {
 void menuArchivos(Sistema& sis) {
     int op;
     do {
-        cout << "\n--- GUARDAR / CARGAR ---\n"
+        cout << "\n--- 9. GUARDAR / CARGAR ---\n"
                 " 1. Guardar datos\n"
                 " 2. Cargar datos (reemplaza los actuales)\n"
                 " 0. Volver\n";
         op = util::leerOpcion("Opcion: ", 0, 2);
-        if (op != 1 && op != 2) continue;
+        if (op != 1 && op != 2) continue;  // 0 vuelve, -1 (invalida) repite el menu
         string archivo, error;
         if (!pedirNombreArchivo(archivo)) return;
         if (op == 1) {
@@ -452,7 +537,7 @@ void menuArchivos(Sistema& sis) {
 
 }  // namespace
 
-// ================================================================== PRINCIPAL
+// ============================================================ PRINCIPAL
 
 void menuPrincipal(Sistema& sis) {
     int op;
@@ -460,25 +545,27 @@ void menuPrincipal(Sistema& sis) {
         cout << "\n=====================================================\n"
                 "  SITRAC - Transporte y Gestion de Rutas\n"
                 "=====================================================\n"
-                " 1. Ciudades\n"
-                " 2. Rutas\n"
-                " 3. Pasajeros\n"
+                " 1. Gestion de ciudades\n"
+                " 2. Gestion de conexiones\n"
+                " 3. Gestion de pasajeros\n"
                 " 4. Cola de solicitudes\n"
-                " 5. Historial\n"
-                " 6. Busquedas\n"
-                " 7. Reportes\n"
-                " 8. Guardar / cargar\n"
+                " 5. Pila de historial\n"
+                " 6. Arbol de busquedas\n"
+                " 7. Rutas y algoritmos\n"
+                " 8. Reportes\n"
+                " 9. Guardar / cargar\n"
                 " 0. Salir\n";
-        op = util::leerOpcion("Opcion: ", 0, 8);
+        op = util::leerOpcion("Opcion: ", 0, 9);
         switch (op) {
             case 1: menuCiudades(sis); break;
-            case 2: menuRutas(sis); break;
+            case 2: menuConexiones(sis); break;
             case 3: menuPasajeros(sis); break;
             case 4: menuCola(sis); break;
             case 5: menuHistorial(sis); break;
-            case 6: menuBusquedas(sis); break;
-            case 7: menuReportes(sis); break;
-            case 8: menuArchivos(sis); break;
+            case 6: menuArbol(sis); break;
+            case 7: menuAlgoritmos(sis); break;
+            case 8: menuReportes(sis); break;
+            case 9: menuArchivos(sis); break;
             default: break;
         }
     } while (op != 0);

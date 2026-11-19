@@ -42,6 +42,15 @@ void ColaSolicitudes::encolar(const Solicitud& s) {
     ++cantidad;
 }
 
+void ColaSolicitudes::encolarAlFrente(const Solicitud& s) {
+    NodoSolicitud* nuevo = new NodoSolicitud;
+    nuevo->dato = s;
+    nuevo->sig = frente;  // el nodo nuevo apunta al antiguo frente
+    frente = nuevo;
+    if (fin == nullptr) fin = nuevo;  // la cola estaba vacia: tambien es el fin
+    ++cantidad;
+}
+
 bool ColaSolicitudes::atender(Solicitud& salida) {
     if (frente == nullptr) return false;
     NodoSolicitud* sacar = frente;

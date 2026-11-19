@@ -10,3 +10,6 @@ sitrac_datos.txt
 # IDE
 .vscode/
 .vs/
+
+# Temporales de las pruebas
+tests/tmp_*

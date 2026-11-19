@@ -1,39 +1,59 @@
 # Evidencias de ejecución
 
-Compilado con `g++ 16.2.0 (MinGW-w64)`: `g++ -std=c++11 -Wall -Wextra -static -o sitrac.exe src/*.cpp`
-→ 0 errores, 0 advertencias.
+## Compilación
 
-Ejecución: `sitrac.exe < tests\entrada_pruebas.txt > tests\salida_pruebas.txt`
-(la salida completa está en `tests/salida_pruebas.txt`).
+```
+g++ -std=c++11 -Wall -Wextra -static -o sitrac.exe src/*.cpp
+```
 
-## Casos obligatorios de la guía
+g++ 16.2 (MinGW-w64): **0 errores, 0 advertencias**.
 
-| Caso | Acción | Resultado obtenido | ¿Pasa? |
-|---|---|---|---|
-| CP-01 | Registrar `Bogota` dos veces | `[!] La ciudad 'Bogota' ya existe. No se registro de nuevo.` y el listado muestra 3 ciudades (no hay nodo extra) | Sí |
-| CP-02 | Eliminar pasajero ID 99 inexistente | `[!] No existe un pasajero con ID 99. No se elimino nada.`; después se inserta y lista normalmente | Sí |
-| CP-03 | Atender con la cola vacía (y otra vez tras vaciarla) | `[!] La cola esta vacia: no hay solicitudes por atender.` | Sí |
-| CP-04 | Ruta Bogota–Cali con distancia `-5` | `[!] Distancia invalida: debe ser un numero mayor que 0.` | Sí |
-| CP-05 | Eliminar `Bogota` (conectada a 2 ciudades) | `[OK] Ciudad eliminada junto con 2 ruta(s) que la conectaban`; luego "Listar rutas" → `(no hay rutas registradas)` y `Medellin no tiene conexiones.` | Sí |
-| CP-06 | Letras donde se pide número (`abc` como opción, `hola` como ID, `abc` como distancia) | `[!] Opcion invalida…` / `[!] Entrada invalida: se esperaba un numero entero.` y vuelve al menú | Sí |
+## Pruebas reproducibles (20 de 20 pasan)
 
-## Pruebas adicionales (módulos reales)
+```
+powershell -ExecutionPolicy Bypass -File tests/pruebas.ps1
+```
 
-- **Encolar** valida pasajero, ciudades y que exista ruta:
-  `Solicitud encolada (posicion 2). Ruta: Medellin -> Bogota -> Cali (875 km)`
-  (Dijkstra pasa por Bogotá: 415 + 460).
-- **Atender** respeta FIFO y alimenta el historial (pila): el historial muestra primero el viaje más reciente.
-- **Duplicado de ID** de pasajero: `[!] Ya existe un pasajero con ID 1. No se inserto.`
-- **Guardar y cargar** (reiniciando el programa): se restauran ciudades, ruta de `415.5` km, pasajero y la solicitud pendiente; "Ruta mas corta" devuelve `Bogota -> Medellin (415.5 km)`.
-- **Archivo dañado** (`ruta` a una ciudad inexistente): `[!] No se pudo cargar (los datos actuales no cambiaron): linea 3: ruta invalida…` y los datos actuales quedan intactos.
-- **Archivo inexistente**: `[!] No se pudo cargar … no se pudo abrir 'no_existe.txt'`.
-- **Fin de entrada abrupto** (Ctrl+Z / archivo que se acaba): el programa se cierra limpio con `Hasta pronto.`, sin ciclo infinito.
+El script ejecuta el programa real con entradas tecleadas, verifica la salida y
+guarda **todo lo que el programa imprimió** en `tests/resultados.txt`.
 
-## Entradas inválidas probadas (mínimo 2 exigidas por la guía)
+| # | Qué se prueba | Qué se verifica |
+|---|---|---|
+| P01 (CP-01) | Ciudad `Bogota` registrada dos veces | Rechaza el duplicado; el listado sigue con 1 ciudad |
+| P02 (CP-02) | Eliminar pasajero inexistente | Informa y la lista queda intacta |
+| P03 (CP-03) | Atender y ver frente con la cola vacía | Mensajes de cola vacía, sin fallar |
+| P04 (CP-04) | Conexión con distancia `-5` | Se rechaza; no se crea la conexión |
+| P05 (CP-05) | Eliminar ciudad con 2 conexiones | Quita las 2 conexiones; la vecina queda sin conexiones |
+| P06 (CP-06) | `abc` como opción y `hola` como ID | Avisa y recupera el menú; el programa termina bien |
+| P07 | ID de pasajero repetido | Se rechaza; sigue habiendo 1 pasajero |
+| P08 | Encolar entre ciudades sin ruta | Solicitud rechazada; cola vacía |
+| P09 | ABB con 50, 30, 70, 20, 40 | Inorden `20 30 40 50 70`, preorden, postorden y altura 3 |
+| P10 | ABB: borrar 30 (dos hijos) | Inorden correcto, lista y árbol con 4 pasajeros, altura 3 |
+| P11 | BFS desde A | Niveles 0, 1, 1, 2, 3 en el orden esperado |
+| P12 | DFS desde A (con ciudad aislada) | Orden A, B, D, C, E; alcanza 5 de 6 |
+| P13 | Dijkstra A → E | `A -> B -> D -> E (8 km)`; hacia ciudad aislada informa que no hay ruta |
+| P14 | Atender y deshacer | El viaje vuelve al frente de la cola; con historial vacío informa |
+| P15 | Guardar y cargar en otra ejecución | Restaura ciudades, conexión 12.5 km, pasajero, cola y ABB |
+| P16 | Archivo corrupto (conexión a ciudad inexistente) | Rechaza indicando la línea; datos actuales intactos |
+| P17 | Archivo con basura | `no es un archivo SITRAC valido` |
+| P18 | Archivo inexistente | `no se pudo abrir`, el programa sigue |
+| P19 | Opciones inválidas (menú principal y submenú) | Mensajes con el rango correcto |
+| P20 | Distancia `abc` y entrada que se acaba | Rechaza; termina con `[Fin de la entrada]` sin colgarse |
 
-1. Opción de menú no numérica (`abc`) → se informa y se vuelve a mostrar el menú.
-2. ID no numérico (`hola`) → operación cancelada, menú intacto.
-3. Distancia no numérica (`abc`) y negativa (`-5`) → rechazadas con mensajes distintos.
-4. ID duplicado / ciudad duplicada → rechazados sin crear nodos.
+## Verificación adicional (no incluida en el repositorio)
 
+Se escribió una prueba de estrés aparte que hizo miles de operaciones aleatorias
+sobre cada estructura y las comparó contra una referencia sencilla:
 
+- **Lista y ABB:** 30 rondas × 600 operaciones; siempre contienen los mismos pasajeros, `inorden` siempre sale ordenado, y se probaron borrados de hoja, un hijo, dos hijos y raíz, y el caso degenerado (IDs ordenados, altura = n).
+- **Cola:** FIFO correcta con encolar, encolar al frente, atender y eliminar solicitudes de un pasajero; el puntero `fin` nunca queda colgando.
+- **Grafo:** tras cada operación aleatoria no hay aristas hacia ciudades borradas y todas son simétricas; BFS/DFS alcanzan exactamente el componente conexo correcto; Dijkstra coincide con Floyd-Warshall y el camino impreso suma el costo informado.
+- **Persistencia:** guardar y cargar conserva el orden de la cola y de la pila y reconstruye el ABB; 20 variantes de archivo dañado se rechazan sin alterar los datos.
+- **Memoria:** contando cada `new` y `delete`, al terminar quedaron **0 bloques sin liberar**.
+- Se comprobó que la prueba detecta errores: al introducir bugs a propósito (no quitar aristas al borrar ciudad, no borrar el sucesor en el ABB) falló miles de veces.
+
+## Capturas de pantalla
+
+Las capturas `tests/1.png`, `2.png`, `4.png` y `6.png` son de la versión del
+taller del 12 de noviembre (menú de 8 opciones). Para la sustentación conviene
+tomar capturas nuevas con la versión actual (menú de 10 opciones).

@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-#include "Utilidades.h"
-
 ListaPasajeros::ListaPasajeros() : cabeza(nullptr), cantidad(0) {}
 
 ListaPasajeros::~ListaPasajeros() { vaciar(); }
@@ -87,16 +85,4 @@ void ListaPasajeros::listar() const {
         std::cout << "  ID " << a->dato.id << " | " << a->dato.nombre << " | "
                   << a->dato.edad << " anios\n";
     std::cout << "  Total: " << cantidad << "\n";
-}
-
-int ListaPasajeros::listarPorNombre(const std::string& fragmento) const {
-    int encontrados = 0;
-    for (const NodoPasajero* a = cabeza; a != nullptr; a = a->sig) {
-        if (util::contiene(a->dato.nombre, fragmento)) {
-            std::cout << "  ID " << a->dato.id << " | " << a->dato.nombre << " | "
-                      << a->dato.edad << " anios\n";
-            ++encontrados;
-        }
-    }
-    return encontrados;
 }

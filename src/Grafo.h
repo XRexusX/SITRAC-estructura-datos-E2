@@ -1,8 +1,11 @@
 // Grafo.h - Grafo NO dirigido y ponderado con LISTA DE ADYACENCIA propia.
-// Cada ciudad es un nodo de una lista enlazada; cada ciudad tiene su propia
-// lista enlazada de aristas (vecinos + distancia en km).
-// Una ruta A-B se guarda dos veces (A->B y B->A) para poder consultar vecinos
-// en O(grado) desde cualquier extremo.
+//
+//   Ciudad  = vertice. Las ciudades forman una lista enlazada.
+//   Arista  = conexion. Cada ciudad tiene su propia lista enlazada de aristas
+//             (a que ciudad llega y a cuantos km).
+//
+// Una conexion A-B se guarda DOS veces (A->B y B->A) porque el grafo no tiene
+// direccion: asi se consultan los vecinos desde cualquiera de los dos extremos.
 #ifndef GRAFO_H
 #define GRAFO_H
 
@@ -18,8 +21,9 @@ struct Arista {
 
 struct Ciudad {
     std::string nombre;
-    Arista* aristas;
-    Ciudad* sig;
+    Arista* aristas;  // lista de vecinos
+    Ciudad* sig;      // siguiente ciudad de la lista
+    int indice;       // numero temporal (0..n-1) que usan BFS, DFS y Dijkstra
 };
 
 enum ResultadoRuta {
@@ -39,30 +43,32 @@ public:
     Grafo& operator=(const Grafo&) = delete;
 
     // ---- Ciudades ----
-    // false si ya existe (sin distinguir mayusculas): no se crea ningun nodo.
-    bool agregarCiudad(const std::string& nombre);
-    // Elimina la ciudad y TODAS las aristas que la apuntan (sin referencias
-    // colgantes). 'rutasEliminadas' = cuantas rutas se quitaron. false si no existe.
-    bool eliminarCiudad(const std::string& nombre, int& rutasEliminadas);
+    bool agregarCiudad(const std::string& nombre);  // false si ya existe
+    // Elimina la ciudad y TODAS las conexiones que llegan a ella.
+    // 'conexionesEliminadas' dice cuantas se quitaron. false si no existe.
+    bool eliminarCiudad(const std::string& nombre, int& conexionesEliminadas);
     const Ciudad* buscar(const std::string& nombre) const;
     void listarCiudades() const;
 
-    // ---- Rutas ----
-    ResultadoRuta agregarRuta(const std::string& a, const std::string& b, double distancia);
-    ResultadoRuta eliminarRuta(const std::string& a, const std::string& b);
-    // false si la ciudad no existe.
-    bool listarVecinos(const std::string& nombre) const;
-    void listarRutas() const;
+    // ---- Conexiones ----
+    ResultadoRuta agregarConexion(const std::string& a, const std::string& b, double distancia);
+    ResultadoRuta eliminarConexion(const std::string& a, const std::string& b);
+    bool listarVecinos(const std::string& nombre) const;  // false si la ciudad no existe
+    void listarConexiones() const;
 
-    // ---- Consultas ----
-    // Dijkstra O(V^2). false si alguna ciudad no existe o no hay camino.
+    // ---- Algoritmos (imprimen su resultado). Todos devuelven false si la
+    // ciudad pedida no existe (o, en Dijkstra, si no hay camino). ----
+    bool recorridoBFS(const std::string& inicio);   // por niveles, usa una cola
+    bool recorridoDFS(const std::string& inicio);   // en profundidad, usa recursion
+    // Dijkstra: camino de menor distancia. Llena 'total' (km) y 'camino' (texto).
     bool rutaMasCorta(const std::string& origen, const std::string& destino,
-                      double& total, std::string& camino) const;
+                      double& total, std::string& camino);
 
+    // ---- Datos para reportes ----
     int cantidadCiudades() const { return cantidad; }
-    int cantidadRutas() const;
+    int cantidadConexiones() const;
     double kilometrosTotales() const;
-    static int grado(const Ciudad* c);
+    static int grado(const Ciudad* c);  // cuantos vecinos tiene
 
     void vaciar();
     void intercambiar(Grafo& otro);
@@ -73,6 +79,7 @@ private:
     static Arista* buscarArista(const Ciudad* desde, const Ciudad* hacia);
     static void insertarArista(Ciudad* desde, Ciudad* hacia, double distancia);
     static bool quitarArista(Ciudad* desde, const Ciudad* hacia);
+    Ciudad** numerar();  // asigna indice 0..n-1 y devuelve un arreglo (hay que hacer delete[])
 
     Ciudad* cabeza;
     int cantidad;

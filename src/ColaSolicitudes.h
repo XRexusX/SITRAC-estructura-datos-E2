@@ -23,7 +23,8 @@ public:
     ColaSolicitudes(const ColaSolicitudes&) = delete;
     ColaSolicitudes& operator=(const ColaSolicitudes&) = delete;
 
-    void encolar(const Solicitud& s);
+    void encolar(const Solicitud& s);          // entra al FINAL de la cola
+    void encolarAlFrente(const Solicitud& s);  // entra al FRENTE (lo usa "deshacer")
     // Saca el frente. false si la cola esta vacia (subdesbordamiento controlado).
     bool atender(Solicitud& salida);
     // Copia el frente sin sacarlo. false si esta vacia.

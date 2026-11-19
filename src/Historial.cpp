@@ -32,6 +32,16 @@ void Historial::apilar(const Viaje& v) {
     ++cantidad;
 }
 
+bool Historial::desapilar(Viaje& salida) {
+    if (tope == nullptr) return false;  // pila vacia: nada que sacar
+    NodoViaje* sacar = tope;
+    salida = sacar->dato;
+    tope = tope->sig;  // el siguiente pasa a ser el tope
+    delete sacar;
+    --cantidad;
+    return true;
+}
+
 void Historial::agregarAlFondo(const Viaje& v) {
     NodoViaje* nuevo = new NodoViaje;
     nuevo->dato = v;

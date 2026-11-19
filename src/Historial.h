@@ -25,9 +25,10 @@ public:
     Historial(const Historial&) = delete;
     Historial& operator=(const Historial&) = delete;
 
-    void apilar(const Viaje& v);                 // nuevo tope
+    void apilar(const Viaje& v);                 // push: nuevo tope
+    bool desapilar(Viaje& salida);               // pop: saca el tope. false si esta vacio
     void agregarAlFondo(const Viaje& v);         // usado al cargar desde archivo
-    bool verTope(Viaje& salida) const;           // false si esta vacio
+    bool verTope(Viaje& salida) const;           // peek: mira el tope sin sacarlo
     void mostrar() const;                        // del mas reciente al mas antiguo
 
     int tamano() const { return cantidad; }

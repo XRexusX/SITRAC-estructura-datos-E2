@@ -44,10 +44,6 @@ bool iguales(const std::string& a, const std::string& b) {
     return minusculas(a) == minusculas(b);
 }
 
-bool contiene(const std::string& texto, const std::string& parte) {
-    return minusculas(texto).find(minusculas(parte)) != std::string::npos;
-}
-
 bool textoValido(const std::string& s) {
     if (s.empty() || s.size() > 40) return false;
     for (std::size_t i = 0; i < s.size(); ++i) {
